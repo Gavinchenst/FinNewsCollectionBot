@@ -27,24 +27,24 @@ rss_feeds = {
     "💻 36氪":{
         "36氪":"https://36kr.com/feed",   
         },
-   # "🇨🇳 中国经济": {
-   #     "香港經濟日報":"https://www.hket.com/rss/china",
-   #     "东方财富":"http://rss.eastmoney.com/rss_partener.xml",
-   #     "百度股票焦点":"http://news.baidu.com/n?cmd=1&class=stock&tn=rss&sub=0",
-   #     "中新网":"https://www.chinanews.com.cn/rss/finance.xml",
-   #     "国家统计局-最新发布":"https://www.stats.gov.cn/sj/zxfb/rss.xml",
-   # },
-   #  "🇺🇸 美国经济": {
-   #     "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",
-   #     "华尔街日报 - 市场":"https://feeds.content.dowjones.io/public/rss/RSSMarketsMain",
-   #     "MarketWatch美股": "https://www.marketwatch.com/rss/topstories",
-   #     "ZeroHedge华尔街新闻": "https://feeds.feedburner.com/zerohedge/feed",
-   #     "ETF Trends": "https://www.etftrends.com/feed/",
-   # },
-   # "🌍 世界经济": {
-   #     "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/socialeconomyfeed",
-   #     "BBC全球经济": "http://feeds.bbci.co.uk/news/business/rss.xml",
-   # },
+    "🇨🇳 中国经济": {
+        "香港經濟日報":"https://www.hket.com/rss/china",
+        "东方财富":"http://rss.eastmoney.com/rss_partener.xml",
+        "百度股票焦点":"http://news.baidu.com/n?cmd=1&class=stock&tn=rss&sub=0",
+        "中新网":"https://www.chinanews.com.cn/rss/finance.xml",
+        "国家统计局-最新发布":"https://www.stats.gov.cn/sj/zxfb/rss.xml",
+    },
+      "🇺🇸 美国经济": {
+        "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",
+        "华尔街日报 - 市场":"https://feeds.content.dowjones.io/public/rss/RSSMarketsMain",
+        "MarketWatch美股": "https://www.marketwatch.com/rss/topstories",
+        "ZeroHedge华尔街新闻": "https://feeds.feedburner.com/zerohedge/feed",
+        "ETF Trends": "https://www.etftrends.com/feed/",
+    },
+    "🌍 世界经济": {
+        "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/socialeconomyfeed",
+        "BBC全球经济": "http://feeds.bbci.co.uk/news/business/rss.xml",
+    },
 }
 
 # 配置常量
@@ -256,7 +256,7 @@ def send_to_wechat(title, content):
         except Exception as e:
             print(f"❌ 发送到 server 酱失败: {e}")
 
-
+# Feishu 推送（不分段，保持与微信消息一致的格式）
 def send_to_feishu(webhooks, title, content):
     # webhooks: list[str]
     for url in webhooks:
@@ -273,32 +273,25 @@ def send_to_feishu(webhooks, title, content):
         except Exception as fe:
             print(f"❌ 发送到 Feishu 失败: {fe}")
 
-
-def chunk_text_by_len(text, max_len=2000):
-    lines = text.splitlines(True)
-    chunks = []
-    cur = ""
-    for line in lines:
-        if len(cur) + len(line) > max_len:
-            if cur:
-                chunks.append(cur)
-                cur = line
-            else:
-                for i in range(0, len(line), max_len):
-                    chunks.append(line[i:i+max_len])
-                cur = ""
-        else:
-            cur += line
-    if cur:
-        chunks.append(cur)
-    return chunks
-
+# 解析 Feishu 配置（多点广播优先，单点回退）
+def gather_feishu_webhooks():
+    webhooks = []
+    feishu_env = os.getenv("FEISHU_WEBHOOK_URLS")
+    if feishu_env:
+        webhooks = [u.strip() for u in feishu_env.split(",") if u.strip()]
+    else:
+        single = os.getenv("FEISHU_WEBHOOK_URL")
+        if single:
+            single = single.strip()
+            if single:
+                webhooks = [single]
+    return webhooks
 
 if __name__ == "__main__":
     today_str = today_date().strftime("%Y-%m-%d")
 
-    # 每个网站获取最多 10 篇文章（可调整）
-    articles_data, analysis_text, failures = fetch_rss_articles(rss_feeds, max_articles=10)
+    # 每个网站获取最多 5 篇文章（可调整）
+    articles_data, analysis_text, failures = fetch_rss_articles(rss_feeds, max_articles=5)
     
     # AI生成摘要（如果分析正文为空，summarize 会返回占位文本）
     summary = summarize(analysis_text)
@@ -325,24 +318,8 @@ if __name__ == "__main__":
     # 推送到多个 server 酱 key
     send_to_wechat(title=f"📌 {today_str} 财经新闻摘要", content=final_summary)
 
-    # Feishu 推送（多 webhook）
-    feishu_env = os.getenv("FEISHU_WEBHOOK_URLS")
-    webhooks = []
-    if feishu_env:
-        webhooks = [u.strip() for u in feishu_env.split(",") if u.strip()]
-    else:
-        single = os.getenv("FEISHU_WEBHOOK_URL")
-        if single:
-            single = single.strip()
-            if single:
-                webhooks = [single]
+    # Feishu 推送（多 webhook，或回退单点）
+    webhooks = gather_feishu_webhooks()
     if webhooks:
-        for category, content in articles_data.items():
-            if not content.strip():
-                continue
-            full_text = f"### {category}\n{content}"
-            chunks = chunk_text_by_len(full_text, max_len=2000)
-            total = len(chunks)
-            for idx, part in enumerate(chunks, start=1):
-                title = f"📌 {today_str} 财经新闻摘要 - {category} (Part {idx}/{total})"
-                send_to_feishu(webhooks, title, part)
+        title = f"📌 {today_str} 财经新闻摘要"
+        send_to_feishu(webhooks, title, final_summary)
