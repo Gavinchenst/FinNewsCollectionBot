@@ -297,8 +297,8 @@ def chunk_text_by_len(text, max_len=2000):
 if __name__ == "__main__":
     today_str = today_date().strftime("%Y-%m-%d")
 
-    # 每个网站获取最多 5 篇文章（可调整）
-    articles_data, analysis_text, failures = fetch_rss_articles(rss_feeds, max_articles=5)
+    # 每个网站获取最多 10 篇文章（可调整）
+    articles_data, analysis_text, failures = fetch_rss_articles(rss_feeds, max_articles=10)
     
     # AI生成摘要（如果分析正文为空，summarize 会返回占位文本）
     summary = summarize(analysis_text)
