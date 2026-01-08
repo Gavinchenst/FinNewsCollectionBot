@@ -11,8 +11,8 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
     steps:
-    #  - name: 📥 克隆仓库
-    #    uses: actions/checkout@v3
+      - name: 📥 克隆仓库
+        uses: actions/checkout@v3
 
       - name: 🛠️ 设置 Python 环境
         uses: actions/setup-python@v4
@@ -22,9 +22,9 @@ jobs:
       - name: 📦 安装依赖
         run: |
           cd $GITHUB_WORKSPACE
-    #      pip install -U pip setuptools wheel
-    #      pip install lxml[html_clean] 
-    #      pip install -r requirements.txt
+          #pip install -U pip setuptools wheel
+          #pip install lxml[html_clean] 
+          #pip install -r requirements.txt
 
       - name: 🔑 设置环境变量
         run: |
