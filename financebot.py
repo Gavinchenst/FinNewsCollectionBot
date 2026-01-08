@@ -256,6 +256,44 @@ def send_to_wechat(title, content):
         except Exception as e:
             print(f"❌ 发送到 server 酱失败: {e}")
 
+
+def send_to_feishu(webhooks, title, content):
+    # webhooks: list[str]
+    for url in webhooks:
+        payload = {
+            "msg_type": "markdown",
+            "markdown": {"title": title, "text": content}
+        }
+        try:
+            resp = requests.post(url, json=payload, timeout=10)
+            if resp.ok:
+                print(f"✅ Feishu 推送成功: {url}")
+            else:
+                print(f"❌ Feishu 推送失败: {url}, 响应：{resp.status_code} {resp.text}")
+        except Exception as fe:
+            print(f"❌ 发送到 Feishu 失败: {fe}")
+
+
+def chunk_text_by_len(text, max_len=2000):
+    lines = text.splitlines(True)
+    chunks = []
+    cur = ""
+    for line in lines:
+        if len(cur) + len(line) > max_len:
+            if cur:
+                chunks.append(cur)
+                cur = line
+            else:
+                for i in range(0, len(line), max_len):
+                    chunks.append(line[i:i+max_len])
+                cur = ""
+        else:
+            cur += line
+    if cur:
+        chunks.append(cur)
+    return chunks
+
+
 if __name__ == "__main__":
     today_str = today_date().strftime("%Y-%m-%d")
 
@@ -286,3 +324,25 @@ if __name__ == "__main__":
 
     # 推送到多个 server 酱 key
     send_to_wechat(title=f"📌 {today_str} 财经新闻摘要", content=final_summary)
+
+    # Feishu 推送（多 webhook）
+    feishu_env = os.getenv("FEISHU_WEBHOOK_URLS")
+    webhooks = []
+    if feishu_env:
+        webhooks = [u.strip() for u in feishu_env.split(",") if u.strip()]
+    else:
+        single = os.getenv("FEISHU_WEBHOOK_URL")
+        if single:
+            single = single.strip()
+            if single:
+                webhooks = [single]
+    if webhooks:
+        for category, content in articles_data.items():
+            if not content.strip():
+                continue
+            full_text = f"### {category}\n{content}"
+            chunks = chunk_text_by_len(full_text, max_len=2000)
+            total = len(chunks)
+            for idx, part in enumerate(chunks, start=1):
+                title = f"📌 {today_str} 财经新闻摘要 - {category} (Part {idx}/{total})"
+                send_to_feishu(webhooks, title, part)
