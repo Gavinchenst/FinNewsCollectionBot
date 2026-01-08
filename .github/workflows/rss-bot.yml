@@ -29,7 +29,7 @@ jobs:
       - name: 🔑 设置环境变量
         run: |
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> $GITHUB_ENV
-          echo "SERVER_CHAN_KEYS=${{ secrets.SERVER_CHAN_KEYS }}" >> $GITHUB_ENV
+          #echo "SERVER_CHAN_KEYS=${{ secrets.SERVER_CHAN_KEYS }}" >> $GITHUB_ENV
           echo "FEISHU_WEBHOOK_URLS=${{ secrets.FEISHU_WEBHOOK_URLS }}" >> $GITHUB_ENV
           echo "FEISHU_WEBHOOK_URL=${{ secrets.FEISHU_WEBHOOK_URL }}" >> $GITHUB_ENV
 
