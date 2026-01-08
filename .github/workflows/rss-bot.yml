@@ -14,12 +14,12 @@ jobs:
     #  - name: 📥 克隆仓库
     #    uses: actions/checkout@v3
 
-    #  - name: 🛠️ 设置 Python 环境
-    #    uses: actions/setup-python@v4
-    #    with:
-    #      python-version: '3.9'
+      - name: 🛠️ 设置 Python 环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-    #  - name: 📦 安装依赖
+      - name: 📦 安装依赖
         run: |
           cd $GITHUB_WORKSPACE
     #      pip install -U pip setuptools wheel
