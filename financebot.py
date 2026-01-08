@@ -27,24 +27,7 @@ rss_feeds = {
     "💻 36氪":{
         "36氪":"https://36kr.com/feed",   
         },
-   # "🇨🇳 中国经济": {
-   #     "香港經濟日報":"https://www.hket.com/rss/china",
-   #     "东方财富":"http://rss.eastmoney.com/rss_partener.xml",
-   #     "百度股票焦点":"http://news.baidu.com/n?cmd=1&class=stock&tn=rss&sub=0",
-  #      "中新网":"https://www.chinanews.com.cn/rss/finance.xml",
-  #      "国家统计局-最新发布":"https://www.stats.gov.cn/sj/zxfb/rss.xml",
-   # },
-   #   "🇺🇸 美国经济": {
-   #     "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/WSJcomUSBusiness",
-   #     "华尔街日报 - 市场":"https://feeds.content.dowjones.io/public/rss/RSSMarketsMain",
-   #     "MarketWatch美股": "https://www.marketwatch.com/rss/topstories",
-   #     "ZeroHedge华尔街新闻": "https://feeds.feedburner.com/zerohedge/feed",
-   #     "ETF Trends": "https://www.etftrends.com/feed/",
-   # },
-   # "🌍 世界经济": {
-   #     "华尔街日报 - 经济":"https://feeds.content.dowjones.io/public/rss/socialeconomyfeed",
-   #     "BBC全球经济": "http://feeds.bbci.co.uk/news/business/rss.xml",
-   # },
+  
 }
 
 # 配置常量
